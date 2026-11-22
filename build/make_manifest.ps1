@@ -27,7 +27,7 @@ $manifest = [ordered]@{
     version = $version
     installer_url = $installerUrl
     sha256 = $sha256
-    notes = "NOVA $version: игровые профили, расширенная статистика FPS, FPS History, Game Boost, Network Monitor и автообновление."
+    notes = ('NOVA {0}: Game profiles, enhanced FPS statistics, FPS History, Game Boost, Network Monitor and automatic updates.' -f $version)
 }
 $out = Join-Path $root 'release\latest.json'
 $manifest | ConvertTo-Json -Depth 4 | Set-Content -Path $out -Encoding utf8
