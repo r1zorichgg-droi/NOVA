@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from PySide6.QtCore import QRectF, QSize, Qt, QUrl
-from PySide6.QtGui import QColor, QDesktopServices, QPainter, QPen
+from PySide6.QtGui import QColor, QDesktopServices, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
-    QAbstractButton, QColorDialog, QHBoxLayout, QLineEdit, QMessageBox, QPushButton, QWidget)
+    QAbstractButton, QColorDialog, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QVBoxLayout, QWidget)
 
 from app_context import AppContext
 from config import ACCENT_PRESETS, APP_VERSION, data_dir, resource_path
@@ -131,13 +131,33 @@ class SettingsPage(Page):
             "файлы на компьютере не удаляются. NOVA не отправляет ваши данные на сторонние серверы.", "caption", wrap=True))
         self.body.addWidget(data)
 
-        about = Card(spacing=6)
-        about.body.addWidget(make_label("О программе и создателе", "h2"))
-        about.body.addWidget(make_label(f"Версия {APP_VERSION}", "muted"))
+        about = Card(spacing=8)
+        about_row = QHBoxLayout()
+        about_row.setContentsMargins(0, 0, 0, 0)
+        about_row.setSpacing(14)
+
+        about_logo = QLabel()
+        about_logo.setFixedSize(84, 84)
+        about_logo.setStyleSheet("background: transparent;")
+        about_pixmap = QPixmap(str(resource_path("assets", "icons", "nova.png")))
+        if not about_pixmap.isNull():
+            about_logo.setPixmap(about_pixmap.scaled(
+                84, 84, Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            ))
+        about_row.addWidget(about_logo, 0, Qt.AlignmentFlag.AlignVCenter)
+
+        about_info = QVBoxLayout()
+        about_info.setContentsMargins(0, 0, 0, 0)
+        about_info.setSpacing(6)
+        about_info.addWidget(make_label("О программе и создателе", "h2"))
+        about_info.addWidget(make_label(f"Версия {APP_VERSION}", "muted"))
         about_btn = QPushButton("О программе")
         about_btn.setObjectName("primary")
         about_btn.clicked.connect(self._open_about)
-        about.body.addWidget(about_btn)
+        about_info.addWidget(about_btn, 0, Qt.AlignmentFlag.AlignLeft)
+        about_row.addLayout(about_info, 1)
+        about.body.addLayout(about_row)
         self.body.addWidget(about)
         self.finish()
 
