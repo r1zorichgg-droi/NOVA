@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 from system.collector import Snapshot
 from system.fmt import fmt_bytes, fmt_percent, fmt_speed_long, fmt_temp
 from ui import theme
+from ui.widgets import Card, Page, Toggle, make_label, setting_row
 
 
 class GameOverlayWindow(QWidget):
@@ -121,27 +122,22 @@ class GameOverlayWindow(QWidget):
         super().mouseReleaseEvent(event)
 
 
-class OverlayPage(QWidget):
+class OverlayPage(Page):
     """Страница управления отдельным игровым оверлеем."""
 
     def __init__(self, ctx, parent: QWidget | None = None) -> None:  # noqa: ANN001
-        from PySide6.QtWidgets import QSlider, QVBoxLayout, QHBoxLayout, QPushButton, QLabel
-        from PySide6.QtCore import Qt
-        from ui.widgets import Card, Page, Toggle, make_label, setting_row
+        from PySide6.QtWidgets import QSlider, QHBoxLayout, QPushButton, QLabel
 
-        super().__init__(parent)
+        super().__init__(
+            "Игровой оверлей",
+            "Системные показатели поверх игры. NOVA не внедряется в игру и не взаимодействует с античитом.",
+            parent,
+        )
         self._ctx = ctx
         self._sampler = ctx.sampler
         self._overlay = GameOverlayWindow(float(ctx.settings.get("overlay_opacity")) / 100.0)
         self._enabled = bool(ctx.settings.get("overlay_enabled"))
         self._sampler.updated.connect(self._on_snapshot)
-
-        # Use the standard Page layout and reparent its contents into this widget.
-        self._page = Page("Игровой оверлей", "Системные показатели поверх игры. NOVA не внедряется в игру и не взаимодействует с античитом.")
-        self._page.setParent(self)
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
-        outer.addWidget(self._page)
 
         card = Card(spacing=12)
         card.body.addWidget(make_label("Оверлей", "h2"))
@@ -166,7 +162,7 @@ class OverlayPage(QWidget):
         self.preview = QPushButton("Показать пример")
         self.preview.clicked.connect(self._show_preview)
         card.body.addWidget(self.preview)
-        self._page.body.addWidget(card)
+        self.body.addWidget(card)
 
         note = Card(spacing=6)
         note.body.addWidget(make_label("Что отображается", "h2"))
@@ -178,8 +174,8 @@ class OverlayPage(QWidget):
             "Важно: поверх полноэкранных игр в эксклюзивном режиме Windows может не показывать сторонние окна. "
             "Для оверлея используй режим «Оконный без рамки» или «Оконный».",
             "caption", wrap=True))
-        self._page.body.addWidget(note)
-        self._page.finish()
+        self.body.addWidget(note)
+        self.finish()
 
         if self._enabled:
             self._activate()
