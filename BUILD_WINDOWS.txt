@@ -1,4 +1,4 @@
-NOVA 1.05.6 — сборка Windows EXE и Inno Setup
+NOVA 1.05.7 — сборка Windows EXE и Inno Setup
 
 Быстрая сборка:
 1. Установи Python 3.13 x64 и Inno Setup 6.
@@ -16,12 +16,14 @@ NOVA 1.05.6 — сборка Windows EXE и Inno Setup
 5. Нажми Build -> Compile или F9.
 6. Готовый установщик создаётся в release\NOVA_Setup_[APP_VERSION].exe.
 
-Автообновление для всех пользователей:
-- Прочитай AUTO_UPDATE.md.
-- Один раз замени OWNER/NOVA на свой публичный GitHub-репозиторий в config.py и installer/NOVA.iss.
-- Каждую новую версию выпускай с увеличенным APP_VERSION в config.py и git tag той же версии, например v1.05.7. Версия установщика синхронизируется автоматически.
-- GitHub Actions соберёт Windows EXE и Inno Setup, создаст latest.json с SHA-256 и опубликует Release.
-- Установленные NOVA проверят общий latest.json при старте. Пользователь подтвердит установку, NOVA обновится через Inno Setup.
+Автообновление:
+- Репозиторий: https://github.com/r1zorichgg-droi/NOVA
+- Манифест: https://github.com/r1zorichgg-droi/NOVA/releases/latest/download/latest.json
+- Для нового выпуска увеличь APP_VERSION в config.py.
+- Создай коммит в GitHub Desktop с Summary, начинающимся с "release:", например "release: NOVA 1.05.8", и нажми Push origin.
+- GitHub Actions соберёт EXE и Inno Setup, создаст latest.json с SHA-256 и опубликует GitHub Release автоматически.
+- Обычные коммиты без префикса "release:" только собирают артефакт, не создавая публичный релиз.
+- Установленные NOVA проверяют общий latest.json при старте и предлагают обновление после проверки SHA-256.
 
-Не меняй AppId в installer/NOVA.iss между версиями. База, профили, FPS History и настройки остаются в %APPDATA%\NOVA.
-Сборка Windows EXE должна выполняться на Windows; из Linux нельзя сделать настоящий Windows EXE/установщик.
+Не меняй AppId в installer\NOVA.iss между версиями. База, профили, FPS History и настройки остаются в %APPDATA%\NOVA.
+Сборка Windows EXE должна выполняться на Windows или Windows runner GitHub Actions.
