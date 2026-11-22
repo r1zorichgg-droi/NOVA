@@ -21,6 +21,7 @@ from ui.install_page import InstallPage
 from ui.library_page import LibraryPage
 from ui.monitor_page import MonitorPage
 from ui.network_page import NetworkPage
+from ui.overlay_page import OverlayPage
 from ui.update_page import UpdatePage
 from ui.process_page import ProcessesPage
 from ui.system_page import SystemPage
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow):
         self.stack = FadeStack()
         self.pages: list[Page] = [
             HomePage(ctx), LibraryPage(ctx, "game"), LibraryPage(ctx, "app"), InstallPage(), PowerPage(ctx), OptimizePage(ctx),
-            DebloatPage(ctx), MonitorPage(ctx), NetworkPage(ctx), ProcessesPage(), ToolsPage(), SystemPage(), IslandPage(ctx),
+            DebloatPage(ctx), MonitorPage(ctx), NetworkPage(ctx), OverlayPage(ctx), ProcessesPage(), ToolsPage(), SystemPage(), IslandPage(ctx),
             AutomationPage(ctx), UpdatePage(ctx), SettingsPage(ctx)]
         for page in self.pages:
             self.stack.addWidget(page)
