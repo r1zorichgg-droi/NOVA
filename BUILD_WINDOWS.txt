@@ -1,0 +1,27 @@
+NOVA 1.05.6 — сборка Windows EXE и Inno Setup
+
+Быстрая сборка:
+1. Установи Python 3.13 x64 и Inno Setup 6.
+2. В корне проекта запусти build_installer.bat.
+3. Готовые файлы появятся в release\:
+   - NOVA.exe
+   - NOVA_Setup_[APP_VERSION].exe
+   - latest.json (манифест автообновления)
+
+Сборка вручную через Inno Setup Compiler:
+1. Собери приложение: build\build_exe.bat. Должен появиться dist\NOVA.exe.
+2. Синхронизируй версию: powershell -ExecutionPolicy Bypass -File build\sync_version.ps1.
+3. Открой Inno Setup Compiler.
+4. File -> Open -> выбери installer\NOVA.iss.
+5. Нажми Build -> Compile или F9.
+6. Готовый установщик создаётся в release\NOVA_Setup_[APP_VERSION].exe.
+
+Автообновление для всех пользователей:
+- Прочитай AUTO_UPDATE.md.
+- Один раз замени OWNER/NOVA на свой публичный GitHub-репозиторий в config.py и installer/NOVA.iss.
+- Каждую новую версию выпускай с увеличенным APP_VERSION в config.py и git tag той же версии, например v1.05.7. Версия установщика синхронизируется автоматически.
+- GitHub Actions соберёт Windows EXE и Inno Setup, создаст latest.json с SHA-256 и опубликует Release.
+- Установленные NOVA проверят общий latest.json при старте. Пользователь подтвердит установку, NOVA обновится через Inno Setup.
+
+Не меняй AppId в installer/NOVA.iss между версиями. База, профили, FPS History и настройки остаются в %APPDATA%\NOVA.
+Сборка Windows EXE должна выполняться на Windows; из Linux нельзя сделать настоящий Windows EXE/установщик.

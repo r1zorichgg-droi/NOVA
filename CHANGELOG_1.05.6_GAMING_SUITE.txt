@@ -1,0 +1,24 @@
+NOVA 1.05.6 — GAMING SUITE
+
+Игры
+- Расширенная статистика PresentMon: FPS, средний FPS, 1% Low, 0.1% Low, frametime, длинные кадры.
+- FPS History: локальная история игровых сессий в %APPDATA%\NOVA.
+- Game Profiles: профили по имени EXE с параметрами Game Boost, FPS-оверлея и приоритета для прямого запуска.
+- Game Boost: ручное включение и возврат ранее сохранённых параметров питания и игровых настроек Windows.
+
+Сеть
+- Network Monitor: ping, потери пакетов, входящий/исходящий трафик и график задержки.
+
+Обновления
+- NOVA Auto Update: публичный HTTPS latest.json, проверка SHA-256, загрузка и запуск Inno Setup после подтверждения.
+- Добавлен GitHub Actions workflow для сборки Windows и публикации GitHub Release по git-тегу v*.
+- Версия Inno Setup автоматически синхронизируется с APP_VERSION из config.py.
+
+Сборка
+- build_installer.bat: собрать NOVA.exe, скомпилировать installer/NOVA.iss и подготовить latest.json.
+- Для ручной сборки открой installer/NOVA.iss в Inno Setup Compiler после build/build_exe.bat и build/sync_version.ps1.
+
+Примечание
+- Windows EXE и Inno Setup installer нужно собрать на Windows или Windows runner GitHub Actions.
+- Для общего канала автообновлений перед первым публичным выпуском замените OWNER/NOVA на свой публичный GitHub-репозиторий.
+- Первую версию с Auto Update (1.05.6) пользователи устанавливают вручную; последующие версии будут находиться через общий latest.json.

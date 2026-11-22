@@ -1,0 +1,43 @@
+NOVA 1.05.5 — актуальный каталог Центра приложений
+
+Всего: 16 программ в пяти категориях.
+
+Игровые платформы:
+- Steam
+- Epic Games Launcher
+- Rockstar Games Launcher
+- Prism Launcher (официальный релиз проекта; для авторизованной сетевой игры нужна лицензия Minecraft)
+- Minecraft Launcher — Windows Legacy (официальный MSI от Mojang)
+
+Музыка:
+- Spotify
+- SoundCloud (официальный Desktop Player как PWA в Chrome, Brave или Edge; отдельного современного EXE нет)
+
+Браузеры:
+- Google Chrome
+- Mozilla Firefox
+- Opera GX
+- Brave
+
+Общение:
+- Discord
+- Telegram Desktop
+
+Утилиты:
+- WinRAR (вместо 7-Zip)
+- OBS Studio
+- Visual Studio Code
+
+Удалены по просьбе пользователя:
+Battle.net, Ubisoft Connect, EA app, GOG GALAXY, Riot Client, Xbox app,
+Minecraft Launcher (современная версия), itch.io, Microsoft Edge, Vivaldi,
+Яндекс Браузер, WhatsApp, Zoom Workplace, Microsoft Teams, Signal,
+VLC media player, ShareX, Microsoft PowerToys, 7-Zip, Playnite и Everything.
+
+Сторонние TLauncher и Legacy Launcher не включены. Вместо стороннего Legacy Launcher
+в категории игровых платформ доступен официальный Minecraft Launcher — Windows Legacy от Mojang.
+
+Prism и Rockstar скачиваются напрямую с сайтов издателей/CDN; если прямой адрес отклоняет
+запрос, NOVA предлагает открыть официальную страницу. Прямые EXE/MSI проверяются по формату,
+сохраняются в Downloads/NOVA Installers и запускаются автоматически. Opera GX, WinRAR и OBS
+скачиваются через WinGet download в ту же папку и запускаются из неё.

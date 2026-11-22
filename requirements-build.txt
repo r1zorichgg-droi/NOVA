@@ -1,0 +1,5 @@
+# Для сборки EXE и генерации иконки (build/build_exe.bat)
+-r requirements.txt
+pyinstaller>=6.10
+pillow>=10.0
+numpy>=1.26

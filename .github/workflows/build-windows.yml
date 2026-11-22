@@ -1,0 +1,62 @@
+name: Build and publish NOVA for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Get source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install Inno Setup 6
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build EXE, setup and update manifest
+        shell: cmd
+        env:
+          NOVA_UPDATE_REPO: ${{ github.repository }}
+        run: build_installer.bat
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NOVA-Windows-${{ github.ref_name }}
+          path: |
+            release/NOVA.exe
+            release/NOVA_Setup_*.exe
+            release/latest.json
+          if-no-files-found: error
+
+      - name: Publish GitHub Release for tagged versions
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Select-String -Path config.py -Pattern '^APP_VERSION\s*=\s*"([0-9.]+)"').Matches[0].Groups[1].Value
+          $tag = $env:GITHUB_REF_NAME
+          if ($tag -ne "v$version") { throw "Tag $tag does not match APP_VERSION $version" }
+          $setup = Get-ChildItem release -Filter 'NOVA_Setup_*.exe' | Select-Object -First 1
+          if (-not $setup) { throw 'Inno Setup installer was not produced.' }
+          $existing = gh release view $tag 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $setup.FullName release/latest.json --clobber
+            gh release edit $tag --title "NOVA $version" --notes "NOVA $version Windows installer and update manifest" --latest
+          } else {
+            gh release create $tag $setup.FullName release/latest.json --title "NOVA $version" --notes "NOVA $version Windows installer and update manifest" --latest
+          }

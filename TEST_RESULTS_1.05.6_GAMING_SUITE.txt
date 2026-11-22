@@ -1,0 +1,12 @@
+NOVA 1.05.6 — тесты
+
+Проверки, выполненные в среде разработки:
+- python -m compileall -q . — успешно;
+- python -m unittest discover -s tests -q — 225 тестов, OK;
+- GitHub Actions workflow YAML — синтаксически разбирается;
+- Inno Setup script использует динамический include installer/version.iss.
+
+Ограничения текущей проверки:
+- Сборка Windows EXE и запуск Inno Setup не выполнялись: текущая среда Linux.
+- Настоящий FPS-оверлей / PresentMon и поведение системных окон нужно проверить на Windows 10/11.
+- Для автообновлений нужно указать свой публичный GitHub OWNER/REPO в config.py и installer/NOVA.iss до первой публикации.

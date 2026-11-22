@@ -1,0 +1,17 @@
+# NOVA — зависимости для запуска. Python 3.12+ (проверялось на 3.13).
+PySide6>=6.8
+psutil>=6.0
+
+# Температуры/загрузка NVIDIA (модуль pynvml). Если нет NVIDIA — NOVA покажет N/A.
+nvidia-ml-py>=12.0
+
+# Только Windows: музыка в Dynamic Island (Windows Media Session)
+winrt-runtime>=2.0; sys_platform == "win32"
+winrt-Windows.Foundation>=2.0; sys_platform == "win32"
+winrt-Windows.Foundation.Collections>=2.0; sys_platform == "win32"
+winrt-Windows.Media.Control>=2.0; sys_platform == "win32"
+winrt-Windows.Storage.Streams>=2.0; sys_platform == "win32"
+
+# Только Windows: уведомление об изменении громкости
+pycaw>=20230407; sys_platform == "win32"
+comtypes>=1.4; sys_platform == "win32"
