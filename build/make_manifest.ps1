@@ -27,7 +27,7 @@ $manifest = [ordered]@{
     version = $version
     installer_url = $installerUrl
     sha256 = $sha256
-    notes = ('NOVA {0} TEST: Game overlay, game profiles, disk analyzer, PC statistics, Network Monitor, Dynamic Island customizer, game library, startup manager and existing features. Test build only.' -f $version)
+    notes = ('NOVA {0}: Game overlay, game profiles, disk analyzer, PC statistics, Network Monitor, Dynamic Island customizer, game library, startup manager and existing features.' -f $version)
 }
 $out = Join-Path $root 'release\latest.json'
 $manifest | ConvertTo-Json -Depth 4 | Set-Content -Path $out -Encoding utf8
