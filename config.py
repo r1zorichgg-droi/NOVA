@@ -70,6 +70,9 @@ DEFAULT_SETTINGS: dict[str, object] = {
     "update_manifest_url": UPDATE_MANIFEST_URL,
     "update_auto_check": True,
     "network_ping_host": "1.1.1.1",
+    # --- игровой оверлей ---
+    "overlay_enabled": False,
+    "overlay_opacity": 92,
 }
 
 MIN_SAMPLE_INTERVAL_MS = 250
