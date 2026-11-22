@@ -37,7 +37,7 @@ Uninstallable=yes
 
 [Tasks]
 Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; GroupDescription: "Дополнительные задачи:"; Flags: unchecked
-Name: "startup"; Description: "Запускать NOVA вместе с Windows (Dynamic Island будет появляться при входе)"; GroupDescription: "Дополнительные задачи:"; Flags: unchecked
+Name: "startup"; Description: "Запускать NOVA вместе с Windows для автоматической проверки обязательных обновлений"; GroupDescription: "Дополнительные задачи:"
 
 [Files]
 Source: "..\dist\NOVA.exe"; DestDir: "{app}"; Flags: ignoreversion

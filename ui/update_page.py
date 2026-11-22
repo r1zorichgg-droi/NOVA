@@ -1,68 +1,74 @@
-"""Страница NOVA Auto Update."""
+"""Страница обязательного обновления NOVA."""
 from __future__ import annotations
 
-from PySide6.QtCore import QTimer, Qt
-from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLineEdit, QMessageBox, QProgressBar, QPushButton
+from pathlib import Path
+
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication, QMessageBox, QProgressBar, QPushButton
 
 from app_context import AppContext
 from config import APP_VERSION, UPDATE_MANIFEST_URL
-from island.model import Notification
 from system.updater import check_update, download_installer, launch_installer
 from ui.widgets import Card, Page, make_label
 from ui.workers import AsyncRunner, ProgressRunner
 
 
 class UpdatePage(Page):
+    """Проверяет обновления при запуске и периодически, не показывая технический URL."""
+
+    CHECK_INTERVAL_MS = 60 * 60 * 1000
+
     def __init__(self, ctx: AppContext) -> None:
-        super().__init__("NOVA Auto Update", "Проверка новой версии, загрузка установщика и обновление без потери пользовательских настроек.")
+        super().__init__(
+            "Обновления NOVA",
+            "Обязательные обновления безопасности, исправления и новые возможности NOVA.",
+        )
         self._ctx = ctx
-        # Если в старой установке пользователь вручную сохранил шаблон OWNER/NOVA,
-        # автоматически переключаемся на адрес, встроенный в актуальную сборку.
-        saved_manifest = str(ctx.settings.get("update_manifest_url"))
-        if "OWNER/NOVA" in saved_manifest and "OWNER/NOVA" not in UPDATE_MANIFEST_URL:
-            ctx.settings.set("update_manifest_url", UPDATE_MANIFEST_URL)
         self._runner = AsyncRunner(self)
         self._progress_runner = ProgressRunner(self)
         self._manifest: dict | None = None
-        self._download_path = None
+        self._download_path: Path | None = None
         self._busy = False
+        self._prompt_open = False
+
+        # URL фиксирован в конфигурации сборки; старые пользовательские значения мигрируют автоматически.
+        ctx.settings.set("update_manifest_url", UPDATE_MANIFEST_URL)
 
         current = Card(spacing=8)
-        current.body.addWidget(make_label("Текущая версия", "h2"))
-        self.version_label = make_label(f"NOVA {APP_VERSION}", "big")
-        current.body.addWidget(self.version_label)
-        self.status = make_label("Обновления проверяются через публичный HTTPS-манифест.", "muted", wrap=True)
+        current.body.addWidget(make_label("Установленная версия", "h2"))
+        current.body.addWidget(make_label(f"NOVA {APP_VERSION}", "big"))
+        self.status = make_label(
+            "Автоматическая проверка выполняется при запуске и затем каждый час.",
+            "muted",
+            wrap=True,
+        )
         current.body.addWidget(self.status)
         self.body.addWidget(current)
 
-        source = Card(spacing=8)
-        source.body.addWidget(make_label("Источник обновлений", "h2"))
-        source.body.addWidget(make_label(
-            "Вставь URL latest.json из GitHub Releases. Для всех пользователей одной и той же сборки укажи постоянную "
-            "ссылку releases/latest/download/latest.json и включи этот URL в следующую публикацию NOVA.",
-            "muted", wrap=True))
-        self.url_edit = QLineEdit(str(ctx.settings.get("update_manifest_url")))
-        self.url_edit.setPlaceholderText("https://github.com/OWNER/NOVA/releases/latest/download/latest.json")
-        source.body.addWidget(self.url_edit)
-        self.auto_check = QCheckBox("Проверять обновления автоматически при запуске NOVA")
-        self.auto_check.setChecked(bool(ctx.settings.get("update_auto_check")))
-        self.auto_check.toggled.connect(lambda value: ctx.settings.set("update_auto_check", bool(value)))
-        source.body.addWidget(self.auto_check)
-        source_buttons = QHBoxLayout()
-        self.save_button = QPushButton("Сохранить адрес")
-        self.save_button.clicked.connect(self._save_url)
-        self.check_button = QPushButton("Проверить обновления")
+        channel = Card(spacing=8)
+        channel.body.addWidget(make_label("Канал обновлений", "h2"))
+        channel.body.addWidget(make_label(
+            "Официальный канал NOVA Project · GitHub Releases. "
+            "Загрузки проверяются по SHA-256 перед установкой.",
+            "muted",
+            wrap=True,
+        ))
+        channel.body.addWidget(make_label(
+            "Когда новая версия опубликована, NOVA автоматически загружает её. "
+            "Чтобы продолжить пользоваться программой, нужно установить обновление; "
+            "отложить его и продолжить работу на старой версии нельзя.",
+            "muted",
+            wrap=True,
+        ))
+        self.check_button = QPushButton("Проверить сейчас")
         self.check_button.setObjectName("primary")
         self.check_button.clicked.connect(self.check_now)
-        source_buttons.addWidget(self.save_button)
-        source_buttons.addWidget(self.check_button)
-        source_buttons.addStretch(1)
-        source.body.addLayout(source_buttons)
-        self.body.addWidget(source)
+        channel.body.addWidget(self.check_button)
+        self.body.addWidget(channel)
 
         update = Card(spacing=8)
-        update.body.addWidget(make_label("Доступное обновление", "h2"))
-        self.release_label = make_label("Пока не проверено", "h3")
+        update.body.addWidget(make_label("Состояние обновления", "h2"))
+        self.release_label = make_label("Проверка ещё не выполнялась", "h3")
         update.body.addWidget(self.release_label)
         self.notes = make_label("", "muted", wrap=True)
         update.body.addWidget(self.notes)
@@ -71,107 +77,188 @@ class UpdatePage(Page):
         self.progress.setValue(0)
         self.progress.hide()
         update.body.addWidget(self.progress)
-        self.install_button = QPushButton("Скачать и установить обновление")
+        self.install_button = QPushButton("Повторить загрузку")
         self.install_button.setObjectName("primary")
         self.install_button.setEnabled(False)
         self.install_button.clicked.connect(self.install_update)
         update.body.addWidget(self.install_button)
         self.body.addWidget(update)
 
-        safety = Card(spacing=6)
-        safety.body.addWidget(make_label("Как это работает", "h2"))
-        safety.body.addWidget(make_label(
-            "NOVA получает latest.json по HTTPS, сравнивает версию, скачивает Inno Setup EXE и сверяет SHA-256. "
-            "Только после совпадения запускается установщик. База NOVA и настройки в %APPDATA% не удаляются. "
-            "Установка требует согласия пользователя и закрывает работающую NOVA.",
-            "muted", wrap=True))
-        self.body.addWidget(safety)
+        info = Card(spacing=6)
+        info.body.addWidget(make_label("Как устанавливается обновление", "h2"))
+        info.body.addWidget(make_label(
+            "NOVA проверяет HTTPS-манифест, скачивает установщик и сверяет SHA-256. "
+            "После проверки появляется обязательное подтверждение установки. "
+            "Можно установить обновление или закрыть NOVA. Настройки, игровые профили "
+            "и история FPS в %APPDATA%\\NOVA сохраняются.",
+            "muted",
+            wrap=True,
+        ))
+        self.body.addWidget(info)
         self.finish()
 
-        if bool(ctx.settings.get("update_auto_check")):
-            QTimer.singleShot(4500, self.check_now)
-
-    def _save_url(self) -> None:
-        self._ctx.settings.set("update_manifest_url", self.url_edit.text().strip())
-        self.status.setText("Адрес обновлений сохранён.")
+        # Проверка обязательна и не зависит от пользовательского переключателя в старых настройках.
+        QTimer.singleShot(3500, self.check_now)
+        self._check_timer = QTimer(self)
+        self._check_timer.setInterval(self.CHECK_INTERVAL_MS)
+        self._check_timer.timeout.connect(self.check_now)
+        self._check_timer.start()
 
     def check_now(self) -> None:
-        if self._busy:
+        if self._busy or self._prompt_open:
             return
-        url = self.url_edit.text().strip()
-        if not url or "OWNER/NOVA" in url:
-            self.status.setText("Сначала укажи публичную HTTPS-ссылку на latest.json своего GitHub-репозитория.")
-            return
+        self._ctx.settings.set("update_manifest_url", UPDATE_MANIFEST_URL)
         self._busy = True
         self.check_button.setEnabled(False)
-        self.status.setText("Проверяем доступность новой версии…")
-        self._runner.submit(lambda: check_update(url), self._on_checked)
+        self.status.setText("Проверяем официальные обновления NOVA…")
+        self._runner.submit(lambda: check_update(UPDATE_MANIFEST_URL), self._on_checked)
 
     def _on_checked(self, result, error) -> None:  # noqa: ANN001
         self._busy = False
         self.check_button.setEnabled(True)
         if error is not None or result is None:
-            self._manifest = None
-            self.install_button.setEnabled(False)
-            self.status.setText(f"Не удалось проверить обновления: {error}")
+            self.status.setText(
+                "Не удалось связаться с сервером обновлений. NOVA повторит проверку позже. "
+                f"Подробности: {error}"
+            )
+            self.release_label.setText("Сервер обновлений временно недоступен")
             return
+
         self._manifest = result
         version = result["version"]
         if result["is_newer"]:
-            self.release_label.setText(f"Доступна NOVA {version}")
+            self.release_label.setText(f"Обязательное обновление: NOVA {version}")
             self.notes.setText(result.get("notes", "Для этой версии нет описания изменений."))
-            self.install_button.setEnabled(True)
-            self.status.setText("Новая версия найдена. Установщик будет проверен по SHA-256 перед запуском.")
-            try:
-                self._ctx.hub.post(Notification(
-                    "system", "Доступно обновление NOVA",
-                    f"Версия {version} найдена. Открой вкладку «Обновления NOVA».",
-                    duration_ms=5200,
-                ))
-            except Exception:
-                pass
+            self.status.setText("Новая версия найдена. Начинаем загрузку установщика…")
+            self._begin_download()
         else:
-            self.release_label.setText(f"У тебя актуальная версия NOVA {APP_VERSION}")
+            self.release_label.setText(f"Установлена актуальная версия NOVA {APP_VERSION}")
             self.notes.setText("Новых версий не найдено.")
-            self.install_button.setEnabled(False)
-            self.status.setText("Проверка завершена.")
+            self.status.setText("Проверка завершена. Следующая проверка — автоматически.")
 
-    def install_update(self) -> None:
+    def _begin_download(self) -> None:
         if self._busy or not self._manifest or not self._manifest.get("is_newer"):
-            return
-        answer = QMessageBox.question(
-            self, "Обновить NOVA", f"Загрузить и установить NOVA {self._manifest['version']}? Программа закроется на время обновления.")
-        if answer != QMessageBox.StandardButton.Yes:
             return
         self._busy = True
         self.install_button.setEnabled(False)
         self.check_button.setEnabled(False)
         self.progress.setValue(0)
         self.progress.show()
-        self.status.setText("Загружаем установщик и проверяем контрольную сумму…")
+        self.status.setText("Загружаем обязательное обновление и проверяем SHA-256…")
         self._progress_runner.start(
             lambda report: download_installer(self._manifest or {}, report),
             self._on_download_progress,
             self._on_downloaded,
         )
 
+    def install_update(self) -> None:
+        """Кнопка повтора после сетевой ошибки."""
+        if self._download_path and self._download_path.is_file():
+            self._require_install()
+        else:
+            self._begin_download()
+
     def _on_download_progress(self, value: int) -> None:
         self.progress.setValue(int(value))
 
+    def _bring_window_forward(self) -> None:
+        window = self.window()
+        try:
+            if window.isMinimized():
+                window.showNormal()
+            else:
+                window.show()
+            window.raise_()
+            window.activateWindow()
+        except Exception:
+            pass
+
     def _on_downloaded(self, path, error) -> None:  # noqa: ANN001
         self._busy = False
+        self.check_button.setEnabled(True)
         if error is not None or path is None:
-            self.status.setText(f"Обновление не установлено: {error}")
+            self.status.setText(f"Не удалось загрузить обновление: {error}")
+            self.install_button.setText("Повторить загрузку")
             self.install_button.setEnabled(True)
-            self.check_button.setEnabled(True)
+            self._require_retry_or_exit()
+            return
+
+        self._download_path = Path(path)
+        self.progress.setValue(100)
+        self.status.setText("Установщик проверен. Требуется установить обновление.")
+        self._require_install()
+
+    def _require_retry_or_exit(self) -> None:
+        if self._prompt_open:
+            return
+        self._prompt_open = True
+        self._bring_window_forward()
+        dialog = QMessageBox(self.window())
+        dialog.setWindowTitle("Не удалось загрузить обновление NOVA")
+        dialog.setIcon(QMessageBox.Icon.Warning)
+        dialog.setText("Для продолжения требуется обновить NOVA, но загрузка не удалась.")
+        dialog.setInformativeText(
+            "Проверь интернет-соединение. Можно повторить загрузку или закрыть NOVA; "
+            "при следующем запуске проверка повторится."
+        )
+        retry = dialog.addButton("Повторить загрузку", QMessageBox.ButtonRole.AcceptRole)
+        exit_button = dialog.addButton("Выйти из NOVA", QMessageBox.ButtonRole.RejectRole)
+        dialog.setDefaultButton(retry)
+        dialog.exec()
+        self._prompt_open = False
+        if dialog.clickedButton() is retry:
+            self._begin_download()
+        else:
+            app = QApplication.instance()
+            if app is not None:
+                app.quit()
+
+    def _require_install(self) -> None:
+        if self._prompt_open:
+            return
+        self._prompt_open = True
+        self._bring_window_forward()
+        version = (self._manifest or {}).get("version", "новая версия")
+        dialog = QMessageBox(self.window())
+        dialog.setWindowTitle("Обязательное обновление NOVA")
+        dialog.setIcon(QMessageBox.Icon.Information)
+        dialog.setText(f"Готова NOVA {version}.")
+        dialog.setInformativeText(
+            "Чтобы продолжить пользоваться NOVA, установите обновление. "
+            "Нажмите «Установить и перезапустить» или закройте программу. "
+            "Установщик уже проверен по SHA-256."
+        )
+        install = dialog.addButton(
+            "Установить и перезапустить", QMessageBox.ButtonRole.AcceptRole
+        )
+        dialog.addButton("Выйти из NOVA", QMessageBox.ButtonRole.RejectRole)
+        dialog.setDefaultButton(install)
+        dialog.exec()
+        clicked = dialog.clickedButton()
+        self._prompt_open = False
+
+        if clicked is not install:
+            app = QApplication.instance()
+            if app is not None:
+                app.quit()
+            return
+
+        if not self._download_path or not self._download_path.is_file():
+            self.status.setText("Установщик не найден. Повторяем загрузку…")
+            self._begin_download()
             return
         try:
-            launch_installer(path)
+            launch_installer(self._download_path)
         except OSError as exc:
-            self.status.setText(f"Не удалось запустить установщик: {exc}")
-            self.install_button.setEnabled(True)
-            self.check_button.setEnabled(True)
+            QMessageBox.critical(
+                self.window(),
+                "Ошибка установки",
+                f"Не удалось запустить установщик NOVA: {exc}",
+            )
+            app = QApplication.instance()
+            if app is not None:
+                app.quit()
             return
+
         self.status.setText("Установщик запущен. NOVA закрывается для обновления.")
-        from PySide6.QtWidgets import QApplication
         QTimer.singleShot(500, QApplication.quit)

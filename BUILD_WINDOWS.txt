@@ -1,29 +1,22 @@
-NOVA 1.05.7 — сборка Windows EXE и Inno Setup
+NOVA 1.05.8 — сборка Windows EXE и Inno Setup
 
 Быстрая сборка:
 1. Установи Python 3.13 x64 и Inno Setup 6.
-2. В корне проекта запусти build_installer.bat.
-3. Готовые файлы появятся в release\:
-   - NOVA.exe
-   - NOVA_Setup_[APP_VERSION].exe
-   - latest.json (манифест автообновления)
+2. Запусти build_installer.bat.
+3. Готовые NOVA.exe, NOVA_Setup_[APP_VERSION].exe и latest.json появятся в release\.
 
-Сборка вручную через Inno Setup Compiler:
-1. Собери приложение: build\build_exe.bat. Должен появиться dist\NOVA.exe.
-2. Синхронизируй версию: powershell -ExecutionPolicy Bypass -File build\sync_version.ps1.
-3. Открой Inno Setup Compiler.
-4. File -> Open -> выбери installer\NOVA.iss.
-5. Нажми Build -> Compile или F9.
-6. Готовый установщик создаётся в release\NOVA_Setup_[APP_VERSION].exe.
+Будущие релизы:
+1. Измени APP_VERSION в config.py.
+2. В GitHub Desktop создай коммит, Summary которого начинается с "release:", например "release: NOVA 1.05.9".
+3. Нажми Push origin.
+4. GitHub Actions автоматически создаст Windows-сборку и GitHub Release.
 
-Автообновление:
-- Репозиторий: https://github.com/r1zorichgg-droi/NOVA
-- Манифест: https://github.com/r1zorichgg-droi/NOVA/releases/latest/download/latest.json
-- Для нового выпуска увеличь APP_VERSION в config.py.
-- Создай коммит в GitHub Desktop с Summary, начинающимся с "release:", например "release: NOVA 1.05.8", и нажми Push origin.
-- GitHub Actions соберёт EXE и Inno Setup, создаст latest.json с SHA-256 и опубликует GitHub Release автоматически.
-- Обычные коммиты без префикса "release:" только собирают артефакт, не создавая публичный релиз.
-- Установленные NOVA проверяют общий latest.json при старте и предлагают обновление после проверки SHA-256.
+Обновления:
+- Автоматическая проверка при старте и каждый час.
+- При обнаружении новой версии установщик скачивается автоматически и проверяется по SHA-256.
+- Пользователь должен установить обновление или выйти из NOVA.
+- NOVA не может обновить выключенный компьютер мгновенно: проверка будет при следующем запуске.
+- В установщике запуск NOVA вместе с Windows выбран по умолчанию, чтобы проверка работала после входа.
+- Пользователям 1.05.7 потребуется один раз установить 1.05.8 вручную.
 
-Не меняй AppId в installer\NOVA.iss между версиями. База, профили, FPS History и настройки остаются в %APPDATA%\NOVA.
-Сборка Windows EXE должна выполняться на Windows или Windows runner GitHub Actions.
+Не меняй AppId в installer\NOVA.iss. Пользовательские данные находятся в %APPDATA%\NOVA.
