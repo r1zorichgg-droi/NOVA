@@ -15,6 +15,7 @@ from system.collector import Snapshot
 from ui import theme
 from ui.automation_page import AutomationPage
 from ui.debloat_page import DebloatPage
+from ui.disk_analyzer_page import DiskAnalyzerPage
 from ui.home_page import HomePage
 from ui.island_page import IslandPage
 from ui.install_page import InstallPage
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow):
         self.stack = FadeStack()
         self.pages: list[Page] = [
             HomePage(ctx), LibraryPage(ctx, "game"), LibraryPage(ctx, "app"), InstallPage(), PowerPage(ctx), OptimizePage(ctx),
-            DebloatPage(ctx), MonitorPage(ctx), NetworkPage(ctx), OverlayPage(ctx), ProcessesPage(), ToolsPage(), SystemPage(), IslandPage(ctx),
+            DebloatPage(ctx), MonitorPage(ctx), DiskAnalyzerPage(), NetworkPage(ctx), OverlayPage(ctx), ProcessesPage(), ToolsPage(), SystemPage(), IslandPage(ctx),
             AutomationPage(ctx), UpdatePage(ctx), SettingsPage(ctx)]
         for page in self.pages:
             self.stack.addWidget(page)
