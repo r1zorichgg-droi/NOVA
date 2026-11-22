@@ -14,7 +14,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL=https://github.com/r1zorichgg-droi/NOVA
 AppSupportURL=https://github.com/r1zorichgg-droi/NOVA/issues
 AppUpdatesURL=https://github.com/r1zorichgg-droi/NOVA/releases
-DefaultDirName={localappdata}\Programs\NOVA
+DefaultDirName={localappdata}\Programs\NOVA 1.06 TEST
 DefaultGroupName=NOVA 1.06 TEST
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
@@ -44,8 +44,8 @@ Source: "..\dist\NOVA.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\NOVA"; Filename: "{app}\NOVA.exe"
-Name: "{autodesktop}\NOVA"; Filename: "{app}\NOVA.exe"; Tasks: desktopicon
+Name: "{group}\NOVA 1.06 TEST"; Filename: "{app}\NOVA.exe"
+Name: "{autodesktop}\NOVA 1.06 TEST"; Filename: "{app}\NOVA.exe"; Tasks: desktopicon
 
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "NOVA 1.06 TEST"; ValueData: """""{app}\NOVA.exe"""" --minimized"; Tasks: startup; Flags: uninsdeletevalue
