@@ -23,7 +23,7 @@ def main() -> None:
             ICON_ICO, format="ICO",
             sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)],
         )
-    print(f"Иконка NOVA готова: {ICON_ICO}")
+    print(f"NOVA icon ready: {ICON_ICO}")
 
 
 if __name__ == "__main__":
