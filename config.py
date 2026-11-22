@@ -11,10 +11,10 @@ from typing import Any
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-APP_NAME = "NOVA 1.06 TEST"
+APP_NAME = "NOVA"
 APP_VERSION = "1.06.0"
 UPDATE_MANIFEST_URL = "https://github.com/r1zorichgg-droi/NOVA/releases/latest/download/latest.json"
-APP_USER_MODEL_ID = "NOVA.Launcher.Test"
+APP_USER_MODEL_ID = "NOVA.Launcher"
 
 # LibreHardwareMonitor -> Options -> Remote Web Server -> Run (порт по умолчанию 8085)
 LHM_URL = "http://127.0.0.1:8085/data.json"
