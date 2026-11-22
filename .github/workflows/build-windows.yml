@@ -37,7 +37,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NOVA-Windows-${{ github.ref_name }}
+          name: NOVA-Windows-${{ github.event_name == 'workflow_dispatch' && 'TEST' || github.ref_name }}-${{ github.run_number }}
           path: |
             release/NOVA.exe
             release/NOVA_Setup_*.exe
