@@ -12,9 +12,8 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 APP_NAME = "NOVA"
-APP_VERSION = "1.05.6"
-# Replace OWNER/NOVA with the public GitHub repository before the first public release.
-UPDATE_MANIFEST_URL = "https://github.com/OWNER/NOVA/releases/latest/download/latest.json"
+APP_VERSION = "1.05.7"
+UPDATE_MANIFEST_URL = "https://github.com/r1zorichgg-droi/NOVA/releases/latest/download/latest.json"
 APP_USER_MODEL_ID = "NOVA.Launcher"
 
 # LibreHardwareMonitor -> Options -> Remote Web Server -> Run (порт по умолчанию 8085)
