@@ -12,7 +12,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 APP_NAME = "NOVA"
-APP_VERSION = "1.06.0"
+APP_VERSION = "1.06.1"
 UPDATE_MANIFEST_URL = "https://github.com/r1zorichgg-droi/NOVA/releases/latest/download/latest.json"
 APP_USER_MODEL_ID = "NOVA.Launcher"
 
