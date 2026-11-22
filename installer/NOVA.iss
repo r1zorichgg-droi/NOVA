@@ -11,9 +11,9 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-AppPublisherURL=https://github.com/OWNER/NOVA
-AppSupportURL=https://github.com/OWNER/NOVA/issues
-AppUpdatesURL=https://github.com/OWNER/NOVA/releases
+AppPublisherURL=https://github.com/r1zorichgg-droi/NOVA
+AppSupportURL=https://github.com/r1zorichgg-droi/NOVA/issues
+AppUpdatesURL=https://github.com/r1zorichgg-droi/NOVA/releases
 DefaultDirName={localappdata}\Programs\NOVA
 DefaultGroupName=NOVA
 DisableProgramGroupPage=yes
@@ -48,7 +48,7 @@ Name: "{group}\NOVA"; Filename: "{app}\NOVA.exe"
 Name: "{autodesktop}\NOVA"; Filename: "{app}\NOVA.exe"; Tasks: desktopicon
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "NOVA"; ValueData: """{app}\NOVA.exe"" --minimized"; Tasks: startup; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "NOVA"; ValueData: """""{app}\NOVA.exe"""" --minimized"; Tasks: startup; Flags: uninsdeletevalue
 
 [Run]
 Filename: "{app}\NOVA.exe"; Description: "Запустить NOVA"; Flags: postinstall nowait skipifsilent
